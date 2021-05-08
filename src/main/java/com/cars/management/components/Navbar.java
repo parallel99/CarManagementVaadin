@@ -12,18 +12,23 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 public class Navbar extends VerticalLayout {
 
     public Navbar() {
+        VerticalLayout verticalLayout = new VerticalLayout();
+        
         MenuBar menuBar = new MenuBar();
         menuBar.setOpenOnHover(true);
 
         menuBar.addItem("Home Page", e -> UI.getCurrent().navigate(MainView.class));
-        menuBar.addItem("Car management", e -> UI.getCurrent().navigate(CarView.class));
-        menuBar.addItem("Manufacturer management", e -> UI.getCurrent().navigate(ManufacturerView.class));
+        menuBar.addItem("Cars", e -> UI.getCurrent().navigate(CarView.class));
+        menuBar.addItem("Manufacturers", e -> UI.getCurrent().navigate(ManufacturerView.class));
 
         MenuItem admin = menuBar.addItem("Admin");
         SubMenu adminSubMenu = admin.getSubMenu();
-        adminSubMenu.addItem("Users management");
+        adminSubMenu.addItem("Users");
 
         menuBar.addItem("Sign Out");
+
+        verticalLayout.add(menuBar);
+        verticalLayout.setHorizontalComponentAlignment(Alignment.CENTER, menuBar);
 
         add(menuBar);
     }
