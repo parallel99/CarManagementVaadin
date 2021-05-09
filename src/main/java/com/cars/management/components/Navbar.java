@@ -13,7 +13,7 @@ public class Navbar extends VerticalLayout {
 
     public Navbar() {
         VerticalLayout verticalLayout = new VerticalLayout();
-        
+
         MenuBar menuBar = new MenuBar();
         menuBar.setOpenOnHover(true);
 
