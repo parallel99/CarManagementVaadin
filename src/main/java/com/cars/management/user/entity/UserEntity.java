@@ -1,6 +1,5 @@
 package com.cars.management.user.entity;
 
-
 import com.cars.management.core.entity.CoreEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -35,6 +34,10 @@ public class UserEntity extends CoreEntity implements UserDetails {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public String getFullName() {
+        return lastName + " " + firstName;
     }
 
     public void setLastName(String lastName) {

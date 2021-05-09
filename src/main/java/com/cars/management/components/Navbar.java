@@ -3,6 +3,7 @@ package com.cars.management.components;
 import com.cars.management.MainView;
 import com.cars.management.car.view.CarView;
 import com.cars.management.manufacturer.view.ManufacturerView;
+import com.cars.management.user.view.UserView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
@@ -23,7 +24,7 @@ public class Navbar extends VerticalLayout {
 
         MenuItem admin = menuBar.addItem("Admin");
         SubMenu adminSubMenu = admin.getSubMenu();
-        adminSubMenu.addItem("Users");
+        adminSubMenu.addItem("Users", e -> UI.getCurrent().navigate(UserView.class));
 
         menuBar.addItem("Sign Out");
 
