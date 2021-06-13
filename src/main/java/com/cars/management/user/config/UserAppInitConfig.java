@@ -16,6 +16,7 @@ public class UserAppInitConfig {
 
     @Autowired
     private RoleService roleService;
+
     @Autowired
     private UserService userService;
 
@@ -23,9 +24,12 @@ public class UserAppInitConfig {
     private void init() {
         List<RoleEntity> roleEntities = roleService.getAll();
         RoleEntity admin = new RoleEntity();
+        RoleEntity user = new RoleEntity();
         if (roleEntities.isEmpty()) {
             admin.setAuthority("ROLE_ADMIN");
+            user.setAuthority("ROLE_USER");
             roleService.add(admin);
+            roleService.add(user);
         }
 
         List<UserEntity> userEntities = userService.getAll();

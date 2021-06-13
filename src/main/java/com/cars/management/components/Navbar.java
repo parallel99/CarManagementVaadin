@@ -30,7 +30,7 @@ public class Navbar extends VerticalLayout {
             adminSubMenu.addItem("Statistics", e -> UI.getCurrent().navigate(UserView.class));
         }
 
-        menuBar.addItem("Sign Out");
+        menuBar.addItem("Sign Out", e -> UI.getCurrent().getPage().setLocation("/logout"));
 
         verticalLayout.add(menuBar);
         verticalLayout.setHorizontalComponentAlignment(Alignment.CENTER, menuBar);

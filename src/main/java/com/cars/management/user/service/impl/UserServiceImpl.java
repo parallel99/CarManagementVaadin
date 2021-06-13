@@ -11,10 +11,13 @@ import javax.persistence.TypedQuery;
 
 @Service
 public class UserServiceImpl extends CoreCRUDServiceImpl<UserEntity> implements UserService {
+
     @Override
     protected void updateCore(UserEntity persistedEntity, UserEntity entity) {
         persistedEntity.setAuthorities(entity.getAuthorities());
         persistedEntity.setUsername(entity.getUsername());
+        persistedEntity.setFirstName(entity.getFirstName());
+        persistedEntity.setLastName(entity.getLastName());
     }
 
     @Override

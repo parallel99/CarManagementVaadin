@@ -8,7 +8,10 @@ import com.cars.management.user.service.UserService;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -25,11 +28,13 @@ import java.util.Collections;
 
 @Route
 public class UserView extends VerticalLayout {
-    private VerticalLayout form;
+    private FormLayout form;
     private UserEntity selectedUser;
     private Binder<UserEntity> binder;
     private TextField username;
     private PasswordField password;
+    private TextField lastName;
+    private TextField firstName;
     private ComboBox<RoleEntity> comboBox;
     private Button deleteBtn = new Button("Delete", VaadinIcon.TRASH.create());
 
@@ -42,65 +47,69 @@ public class UserView extends VerticalLayout {
     public void init() {
         add(new Navbar());
         add(new Text("A felhasználók oldala"));
-        Grid<UserEntity> grid = new Grid<>();
-        grid.setItems(service.getAll());
-        grid.addColumn(UserEntity::getId).setHeader("Id");
-        grid.addColumn(UserEntity::getUsername).setHeader("Username");
-        grid.addColumn(userEntity -> {
-                    if (userEntity.getAuthorities() != null) {
-                        StringBuilder builder = new StringBuilder();
-                        userEntity.getAuthorities().forEach(roleEntity -> {
-                            builder.append(roleEntity.getAuthority()).append(",");
-                        });
-                        return builder.toString();
-                    }
-                    return "";
-                }
-        ).setHeader("User");
-        grid.asSingleSelect().addValueChangeListener(event -> {
-            selectedUser = event.getValue();
-            binder.setBean(selectedUser);
-            form.setVisible(selectedUser != null);
-            deleteBtn.setEnabled(selectedUser != null);
-
-        });
+        Grid<UserEntity> grid = addGrid();
         addButtonBar(grid);
-        add(grid);
         addForm(grid);
+        add(grid);
     }
 
     private void addForm(Grid<UserEntity> grid) {
-        form = new VerticalLayout();
+        form = new FormLayout();
         binder = new Binder<>(UserEntity.class);
 
-        HorizontalLayout nameField = new HorizontalLayout();
         username = new TextField();
-        nameField.add(new Text("Username"), username);
+        username.setLabel("Username");
+        username.setMaxLength(60);
+        username.setMinLength(4);
+        form.add(username);
 
-        HorizontalLayout passwordField = new HorizontalLayout();
+        firstName = new TextField();
+        firstName.setLabel("First name");
+        firstName.setMaxLength(60);
+        firstName.setMinLength(4);
+        form.add(firstName);
+
+        lastName = new TextField();
+        lastName.setLabel("Last name");
+        lastName.setMaxLength(60);
+        lastName.setMinLength(4);
+        form.add(lastName);
+
         password = new PasswordField();
-        passwordField.add(new Text("Password"), password);
+        password.setLabel("Password");
+        password.setMaxLength(80);
+        password.setMinLength(6);
+        form.add(password);
 
-        HorizontalLayout authorField = new HorizontalLayout();
         comboBox = new ComboBox<>();
         comboBox.setItems(roleService.getAll());
         comboBox.setItemLabelGenerator(authorEntity -> authorEntity.getAuthority());
-        authorField.add(new Text("Authorities"), comboBox);
+        comboBox.setLabel("Authorities");
+        form.add(comboBox);
 
+        Button saveBtn = addSaveBtn(grid);
 
-        form.add(nameField, authorField, passwordField, addSaveBtn(grid));
-        add(form);
+        form.add(saveBtn);
+        form.setColspan(saveBtn, 2);
+        form.setWidth("1200px");
+
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.add(form);
+        verticalLayout.setHorizontalComponentAlignment(Alignment.CENTER, form);
+
+        add(verticalLayout);
         form.setVisible(false);
         binder.bindInstanceFields(this);
     }
 
     private Button addSaveBtn(Grid<UserEntity> grid) {
-        Button saveBtn = new Button("Save", VaadinIcon.SAFE.create());
+        Button saveBtn = new Button("Save");
         saveBtn.addClickListener(buttonClickEvent -> {
-            //mentés
             if (selectedUser.getId() == null) {
                 UserEntity bookEntity = new UserEntity();
                 bookEntity.setUsername(selectedUser.getUsername());
+                bookEntity.setLastName(selectedUser.getLastName());
+                bookEntity.setFirstName(selectedUser.getFirstName());
                 bookEntity.setAuthorities(Collections.singletonList(comboBox.getValue()));
                 bookEntity.setPassword(new BCryptPasswordEncoder().encode(selectedUser.getPassword()));
                 service.add(bookEntity);
@@ -115,18 +124,16 @@ public class UserView extends VerticalLayout {
             form.setVisible(false);
         });
         return saveBtn;
-
     }
 
     private void addButtonBar(Grid<UserEntity> grid) {
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         deleteBtn.addClickListener(buttonClickEvent -> {
             service.remove(selectedUser);
-            Notification.show("Sikeres törlés");
+            Notification.show("Successful delete");
             selectedUser = null;
             grid.setItems(service.getAll());
             form.setVisible(false);
-
         });
         deleteBtn.setEnabled(false);
 
@@ -135,10 +142,46 @@ public class UserView extends VerticalLayout {
             selectedUser = new UserEntity();
             binder.setBean(selectedUser);
             form.setVisible(true);
-
+            password.setVisible(true);
         });
         horizontalLayout.add(deleteBtn);
         horizontalLayout.add(addBtn);
-        add(horizontalLayout);
+        horizontalLayout.setWidth(null);
+
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.add(horizontalLayout);
+        verticalLayout.setHorizontalComponentAlignment(Alignment.CENTER, horizontalLayout);
+
+        add(verticalLayout);
+    }
+
+    private Grid<UserEntity> addGrid() {
+        Grid<UserEntity> grid = new Grid<>();
+        grid.setItems(service.getAll());
+        grid.addColumn(UserEntity::getId).setHeader("Id");
+        grid.addColumn(UserEntity::getUsername).setHeader("Username");
+        grid.addColumn(UserEntity::getFirstName).setHeader("First name");
+        grid.addColumn(UserEntity::getLastName).setHeader("Last name");
+        grid.addColumn(userEntity -> {
+                    if (userEntity.getAuthorities() != null) {
+                        StringBuilder builder = new StringBuilder();
+                        userEntity.getAuthorities().forEach(roleEntity -> {
+                            builder.append(roleEntity.getAuthority()).append(",");
+                        });
+                        return builder.toString();
+                    }
+                    return "";
+                }
+        ).setHeader("Authorities");
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            selectedUser = event.getValue();
+            binder.setBean(selectedUser);
+            form.setVisible(selectedUser != null);
+            deleteBtn.setEnabled(selectedUser != null);
+            password.setVisible(false);
+        });
+        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
+
+        return grid;
     }
 }
