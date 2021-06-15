@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Entity
 public class RoleEntity extends CoreEntity implements GrantedAuthority {
 
-    @Column(name = "authority")
+    @Column(name = "authority", unique = false)
     private String authority;
 
     @Override

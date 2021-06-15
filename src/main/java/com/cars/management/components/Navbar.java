@@ -27,7 +27,7 @@ public class Navbar extends VerticalLayout {
             MenuItem admin = menuBar.addItem("Admin");
             SubMenu adminSubMenu = admin.getSubMenu();
             adminSubMenu.addItem("Users", e -> UI.getCurrent().navigate(UserView.class));
-            adminSubMenu.addItem("Statistics", e -> UI.getCurrent().navigate(UserView.class));
+            //adminSubMenu.addItem("Statistics", e -> UI.getCurrent().navigate(UserView.class));
         }
 
         menuBar.addItem("Sign Out", e -> UI.getCurrent().getPage().setLocation("/logout"));

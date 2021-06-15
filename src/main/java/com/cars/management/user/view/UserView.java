@@ -46,7 +46,6 @@ public class UserView extends VerticalLayout {
     @PostConstruct
     public void init() {
         add(new Navbar());
-        add(new Text("A felhasználók oldala"));
         Grid<UserEntity> grid = addGrid();
         addButtonBar(grid);
         addForm(grid);
@@ -59,24 +58,28 @@ public class UserView extends VerticalLayout {
 
         username = new TextField();
         username.setLabel("Username");
+        username.setPlaceholder("Please enter the username");
         username.setMaxLength(60);
         username.setMinLength(4);
         form.add(username);
 
         firstName = new TextField();
         firstName.setLabel("First name");
+        firstName.setPlaceholder("Please enter the First Name");
         firstName.setMaxLength(60);
         firstName.setMinLength(4);
         form.add(firstName);
 
         lastName = new TextField();
         lastName.setLabel("Last name");
+        lastName.setPlaceholder("Please enter the Last Name");
         lastName.setMaxLength(60);
         lastName.setMinLength(4);
         form.add(lastName);
 
         password = new PasswordField();
         password.setLabel("Password");
+        password.setPlaceholder("Please enter the password");
         password.setMaxLength(80);
         password.setMinLength(6);
         form.add(password);
@@ -85,6 +88,7 @@ public class UserView extends VerticalLayout {
         comboBox.setItems(roleService.getAll());
         comboBox.setItemLabelGenerator(authorEntity -> authorEntity.getAuthority());
         comboBox.setLabel("Authorities");
+        comboBox.setPlaceholder("Please choose a authority");
         form.add(comboBox);
 
         Button saveBtn = addSaveBtn(grid);
@@ -115,11 +119,11 @@ public class UserView extends VerticalLayout {
                 service.add(bookEntity);
                 grid.setItems(service.getAll());
                 selectedUser = null;
-                Notification.show("Sikeres mentés");
+                Notification.show("Successful save");
             } else {
                 service.update(selectedUser);
                 grid.setItems(service.getAll());
-                Notification.show("Sikeres módosítás");
+                Notification.show("Successful update");
             }
             form.setVisible(false);
         });
