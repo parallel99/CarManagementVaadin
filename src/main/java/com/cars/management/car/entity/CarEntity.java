@@ -20,12 +20,12 @@ public class CarEntity extends CoreEntity {
     private Integer doorNumber;
 
     @Column(name = "release_date")
-    private Date releaseDate;
+    private Integer releaseDate;
 
     @ManyToOne
     private ManufacturerEntity manufacturer;
 
-    public CarEntity(String model, Integer doorNumber, Date releaseDate, ManufacturerEntity manufacturer) {
+    public CarEntity(String model, Integer doorNumber, Integer releaseDate, ManufacturerEntity manufacturer) {
         this.model = model;
         this.doorNumber = doorNumber;
         this.releaseDate = releaseDate;
@@ -52,11 +52,11 @@ public class CarEntity extends CoreEntity {
         this.doorNumber = doorNumber;
     }
 
-    public Date getReleaseDate() {
+    public Integer getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(Date releaseDate) {
+    public void setReleaseDate(Integer releaseDate) {
         this.releaseDate = releaseDate;
     }
 

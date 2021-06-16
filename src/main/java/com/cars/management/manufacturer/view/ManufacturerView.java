@@ -101,6 +101,7 @@ public class ManufacturerView extends CoreView {
         grid.asSingleSelect().addValueChangeListener(event -> {
             selectedManufacturer = event.getValue();
             loadData(grid);
+            formSearch.setVisible(false);
             form.setVisible(!grid.asSingleSelect().isEmpty());
         });
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
