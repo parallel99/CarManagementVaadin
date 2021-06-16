@@ -132,7 +132,6 @@ public class ManufacturerView extends CoreView {
                     grid.select(null);
                     Notification.show("Successful update");
                 }
-
             } catch (Exception e) {
                 System.out.println(e);
                 Notification.show("Something went wrong");
