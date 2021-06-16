@@ -8,10 +8,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -26,10 +24,14 @@ import javax.annotation.PostConstruct;
 public class ManufacturerView extends CoreView {
 
     private FormLayout form;
+    private FormLayout formSearch;
+    private VerticalLayout mainFormPlace;
     private TextField manufacturer;
+    private TextField manufacturerSearch;
     private ManufacturerEntity selectedManufacturer;
     private Button saveBtn;
     private Button searchBtn;
+    private Binder<ManufacturerEntity> binder;
 
     @Autowired
     private ManufacturerService service;
@@ -38,32 +40,56 @@ public class ManufacturerView extends CoreView {
     public void init() {
         add(new Navbar());
         Grid<ManufacturerEntity> grid = addGrid();
+        mainFormPlace = new VerticalLayout();
         form = new FormLayout();
+        formSearch = new FormLayout();
         selectedManufacturer = new ManufacturerEntity();
-        addButtonBar("Add Manufacturer","Search Manufacture", form, grid);
-        addForm(addSaveBtn(grid), searchBtn(grid));
-        add(grid);
+        addButtonBar("Add Manufacturer","Search Manufacture", grid);
+        addForm(addSaveBtn(grid));
+        addSearchForm(searchBtn(grid));
+        add(mainFormPlace);
+
+        setSizeFull();
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.add(grid);
+        verticalLayout.setSizeFull();
+        add(verticalLayout);
     }
 
-    private void addForm(Button addBtn, Button searchBtn) {
+    private void addForm(Button addBtn) {
+        binder = new Binder<>(ManufacturerEntity.class);
+
         manufacturer = new TextField();
         manufacturer.setLabel("Manufacturer");
         manufacturer.setPlaceholder("Please enter the manufacturer name");
         manufacturer.setMaxLength(500);
 
-        searchBtn.setVisible(false);
-
         form.add(manufacturer);
         form.add(addBtn);
-        form.add(searchBtn);
         form.setWidth("600px");
         form.setVisible(false);
+        validation();
 
-        VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.add(form);
+        mainFormPlace.add(form);
+        mainFormPlace.setHorizontalComponentAlignment(Alignment.CENTER, form);
 
-        verticalLayout.setHorizontalComponentAlignment(Alignment.CENTER, form);
-        add(verticalLayout);
+        binder.bindInstanceFields(this);
+    }
+
+    private void addSearchForm(Button btn) {
+        manufacturerSearch = new TextField();
+        manufacturerSearch.setLabel("Manufacturer");
+        manufacturerSearch.setPlaceholder("Please enter the manufacturer name");
+        manufacturerSearch.setMaxLength(500);
+
+        formSearch.add(manufacturerSearch);
+        formSearch.add(btn);
+        formSearch.setWidth("600px");
+        formSearch.setVisible(false);
+        validation();
+
+        mainFormPlace.add(formSearch);
+        mainFormPlace.setHorizontalComponentAlignment(Alignment.CENTER, formSearch);
     }
 
     private Grid<ManufacturerEntity> addGrid() {
@@ -79,6 +105,7 @@ public class ManufacturerView extends CoreView {
         });
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
         grid.setMultiSort(true);
+        grid.setMinHeight("350px");
 
         return grid;
     }
@@ -87,22 +114,25 @@ public class ManufacturerView extends CoreView {
         saveBtn = new Button("Save");
         saveBtn.addClickListener(buttonClickEvent -> {
             try {
-                if (grid.asSingleSelect().isEmpty()) {
+                binder.validate();
+                if (grid.asSingleSelect().isEmpty() && binder.isValid()) {
                     ManufacturerEntity manufacturerEntity = new ManufacturerEntity();
                     manufacturerEntity.setManufacturerName(manufacturer.getValue());
                     service.add(manufacturerEntity);
                     Notification.show("Successful save");
                     form.setVisible(false);
                     grid.setItems(service.getAll());
-                } else {
+                    clearInputs();
+                    grid.select(null);
+                } else if (binder.isValid()) {
                     selectedManufacturer.setManufacturerName(manufacturer.getValue());
-                    System.out.println(selectedManufacturer.getId() + " : " + selectedManufacturer.getManufacturerName());
                     service.update(selectedManufacturer);
                     grid.getDataProvider().refreshAll();
+                    clearInputs();
+                    grid.select(null);
                     Notification.show("Successful update");
                 }
-                clearInputs();
-                grid.select(null);
+
             } catch (Exception e) {
                 System.out.println(e);
                 Notification.show("Something went wrong");
@@ -116,7 +146,7 @@ public class ManufacturerView extends CoreView {
         searchBtn = new Button("Search", VaadinIcon.SEARCH.create());
         searchBtn.addClickListener(buttonClickEvent -> {
             try {
-                grid.setItems(service.findByManufactureName(manufacturer.getValue()));
+                grid.setItems(service.findByManufactureName(manufacturerSearch.getValue()));
                 Notification.show("Successful Search");
             } catch (Exception e) {
                 System.out.println(e);
@@ -141,16 +171,15 @@ public class ManufacturerView extends CoreView {
         return button;
     }
 
-    protected void addButtonBar(String addText, String searchText, FormLayout form, Grid<ManufacturerEntity> grid) {
+    protected void addButtonBar(String addText, String searchText, Grid<ManufacturerEntity> grid) {
         Button addBtnLocal = new Button();
         addBtnLocal.setText(addText);
         addBtnLocal.setIcon(VaadinIcon.PLUS.create());
 
         addBtnLocal.addClickListener(buttonClickEvent -> {
-            saveBtn.setVisible(true);
-            searchBtn.setVisible(false);
             grid.select(null);
             clearInputs();
+            formSearch.setVisible(false);
             form.setVisible(!form.isVisible());
         });
 
@@ -159,9 +188,8 @@ public class ManufacturerView extends CoreView {
         searchBtnLocal.setIcon(VaadinIcon.SEARCH.create());
 
         searchBtnLocal.addClickListener(buttonClickEvent -> {
-            searchBtn.setVisible(true);
-            saveBtn.setVisible(false);
-            form.setVisible(!form.isVisible());
+            form.setVisible(false);
+            formSearch.setVisible(!formSearch.isVisible());
         });
 
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -175,6 +203,15 @@ public class ManufacturerView extends CoreView {
         if (!grid.asSingleSelect().isEmpty()) {
             manufacturer.setValue(grid.asSingleSelect().getValue().getManufacturerName());
         }
+    }
+
+    private void validation() {
+        binder.forField(manufacturer)
+                .asRequired("The manufacturer field is required")
+                .withValidator(name -> name.length() >= 6, "The manufacturer name is too short")
+                .withValidator(name -> name.length() <= 500, "The manufacturer name is too long")
+                .withValidator(name -> service.countManufacturesByName(name) == 0, "The manufacturer name is not unique")
+                .bind(ManufacturerEntity::getManufacturerName, ManufacturerEntity::setManufacturerName);
     }
 
     private void clearInputs() {

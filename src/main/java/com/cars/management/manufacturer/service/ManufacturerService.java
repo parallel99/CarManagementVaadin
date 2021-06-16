@@ -7,5 +7,7 @@ import java.util.List;
 
 public interface ManufacturerService extends CoreCRUDService<ManufacturerEntity> {
 
-    public List<ManufacturerEntity> findByManufactureName(String text);
+    List<ManufacturerEntity> findByManufactureName(String text);
+
+    Long countManufacturesByName(String text);
 }

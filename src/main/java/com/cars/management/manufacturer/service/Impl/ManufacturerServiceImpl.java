@@ -26,4 +26,11 @@ public class ManufacturerServiceImpl extends CoreCRUDServiceImpl<ManufacturerEnt
                 .setParameter("name", "%"+text+"%")
                 .getResultList();
     }
+
+    @Override
+    public Long countManufacturesByName(String text) {
+        return entityManager.createQuery("SELECT COUNT(n) FROM ManufacturerEntity n WHERE n.manufacturerName LIKE :name", Long.class)
+                .setParameter("name", text)
+                .getSingleResult();
+    }
 }
