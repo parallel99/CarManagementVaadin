@@ -1,6 +1,7 @@
 package com.cars.management.user.view;
 
 import com.cars.management.components.Navbar;
+import com.cars.management.core.view.CoreView;
 import com.cars.management.user.entity.RoleEntity;
 import com.cars.management.user.entity.UserEntity;
 import com.cars.management.user.service.RoleService;
@@ -27,7 +28,8 @@ import javax.annotation.PostConstruct;
 import java.util.Collections;
 
 @Route
-public class UserView extends VerticalLayout {
+public class UserView extends CoreView {
+
     private FormLayout form;
     private UserEntity selectedUser;
     private Binder<UserEntity> binder;
@@ -110,13 +112,13 @@ public class UserView extends VerticalLayout {
         Button saveBtn = new Button("Save");
         saveBtn.addClickListener(buttonClickEvent -> {
             if (selectedUser.getId() == null) {
-                UserEntity bookEntity = new UserEntity();
-                bookEntity.setUsername(selectedUser.getUsername());
-                bookEntity.setLastName(selectedUser.getLastName());
-                bookEntity.setFirstName(selectedUser.getFirstName());
-                bookEntity.setAuthorities(Collections.singletonList(comboBox.getValue()));
-                bookEntity.setPassword(new BCryptPasswordEncoder().encode(selectedUser.getPassword()));
-                service.add(bookEntity);
+                UserEntity userEntity = new UserEntity();
+                userEntity.setUsername(selectedUser.getUsername());
+                userEntity.setLastName(selectedUser.getLastName());
+                userEntity.setFirstName(selectedUser.getFirstName());
+                userEntity.setAuthorities(Collections.singletonList(comboBox.getValue()));
+                userEntity.setPassword(new BCryptPasswordEncoder().encode(selectedUser.getPassword()));
+                service.add(userEntity);
                 grid.setItems(service.getAll());
                 selectedUser = null;
                 Notification.show("Successful save");

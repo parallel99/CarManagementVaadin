@@ -5,6 +5,8 @@ import com.cars.management.manufacturer.entity.ManufacturerEntity;
 import com.cars.management.manufacturer.service.ManufacturerService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ManufacturerServiceImpl extends CoreCRUDServiceImpl<ManufacturerEntity> implements ManufacturerService {
 
@@ -16,5 +18,12 @@ public class ManufacturerServiceImpl extends CoreCRUDServiceImpl<ManufacturerEnt
     @Override
     protected Class<ManufacturerEntity> getManagedClass() {
         return ManufacturerEntity.class;
+    }
+
+    @Override
+    public List<ManufacturerEntity> findByManufactureName(String text) {
+        return entityManager.createQuery("SELECT n FROM ManufacturerEntity n WHERE n.manufacturerName LIKE :name", ManufacturerEntity.class)
+                .setParameter("name", "%"+text+"%")
+                .getResultList();
     }
 }

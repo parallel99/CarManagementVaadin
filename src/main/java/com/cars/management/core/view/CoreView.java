@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 
 public abstract class CoreView extends VerticalLayout {
 
@@ -11,17 +12,25 @@ public abstract class CoreView extends VerticalLayout {
 
     }
 
-    protected void addButtonBar(String addText, FormLayout form) {
-        Button btn = new Button();
-        btn.setText(addText);
-        btn.setIcon(VaadinIcon.PLUS.create());
-        VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.add(btn);
-        verticalLayout.setHorizontalComponentAlignment(Alignment.CENTER, btn);
-        btn.addClickListener(buttonClickEvent -> {
-           form.setVisible(!form.isVisible());
-        });
+    public TextField readOnlyField(String label, String text) {
+        if (!text.isEmpty()) {
+            TextField field = new TextField();
+            field.setLabel(label);
+            field.setValue(text);
+            field.setReadOnly(true);
+            field.setWidthFull();
+            return field;
+        }
 
-        add(verticalLayout);
+        TextField fake = new TextField("fake");
+        fake.setVisible(false);
+        return fake;
+    }
+
+    protected Button disabledButton(String text) {
+        Button btn = new Button();
+        btn.setText(text);
+        btn.setEnabled(false);
+        return btn;
     }
 }

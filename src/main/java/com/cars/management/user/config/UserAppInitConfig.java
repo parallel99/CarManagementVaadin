@@ -26,8 +26,8 @@ public class UserAppInitConfig {
         RoleEntity admin = new RoleEntity();
         RoleEntity user = new RoleEntity();
         if (roleEntities.isEmpty()) {
-            admin.setAuthority("ROLE_ADMIN");
-            user.setAuthority("ROLE_USER");
+            admin.setAuthority("ADMIN");
+            user.setAuthority("USER");
             roleService.add(admin);
             roleService.add(user);
         }
