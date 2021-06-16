@@ -1,10 +1,15 @@
 package com.cars.management.core.view;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.icon.VaadinIcon;
+import com.cars.management.MainView;
+import com.cars.management.car.view.CarView;
+import com.cars.management.manufacturer.view.ManufacturerView;
+import com.cars.management.security.SecurityUtils;
+import com.cars.management.user.view.UserView;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.contextmenu.SubMenu;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
 
 public abstract class CoreView extends VerticalLayout {
 
@@ -12,25 +17,27 @@ public abstract class CoreView extends VerticalLayout {
 
     }
 
-    public TextField readOnlyField(String label, String text) {
-        if (!text.isEmpty()) {
-            TextField field = new TextField();
-            field.setLabel(label);
-            field.setValue(text);
-            field.setReadOnly(true);
-            field.setWidthFull();
-            return field;
+    protected VerticalLayout navbar() {
+        VerticalLayout verticalLayout = new VerticalLayout();
+
+        MenuBar menuBar = new MenuBar();
+        menuBar.setOpenOnHover(true);
+
+        menuBar.addItem("Home Page", e -> UI.getCurrent().navigate(MainView.class));
+        menuBar.addItem("Cars", e -> UI.getCurrent().navigate(CarView.class));
+        menuBar.addItem("Manufacturers", e -> UI.getCurrent().navigate(ManufacturerView.class));
+
+        if(SecurityUtils.isAdmin()){
+            MenuItem admin = menuBar.addItem("Admin");
+            SubMenu adminSubMenu = admin.getSubMenu();
+            adminSubMenu.addItem("Users", e -> UI.getCurrent().navigate(UserView.class));
         }
 
-        TextField fake = new TextField("fake");
-        fake.setVisible(false);
-        return fake;
-    }
+        menuBar.addItem("Sign Out", e -> UI.getCurrent().getPage().setLocation("/logout"));
 
-    protected Button disabledButton(String text) {
-        Button btn = new Button();
-        btn.setText(text);
-        btn.setEnabled(false);
-        return btn;
+        verticalLayout.add(menuBar);
+        verticalLayout.setHorizontalComponentAlignment(Alignment.CENTER, menuBar);
+
+        return verticalLayout;
     }
 }

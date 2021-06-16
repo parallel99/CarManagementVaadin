@@ -1,18 +1,15 @@
 package com.cars.management.user.view;
 
-import com.cars.management.components.Navbar;
 import com.cars.management.core.view.CoreView;
 import com.cars.management.user.entity.RoleEntity;
 import com.cars.management.user.entity.UserEntity;
 import com.cars.management.user.service.RoleService;
 import com.cars.management.user.service.UserService;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -47,7 +44,7 @@ public class UserView extends CoreView {
 
     @PostConstruct
     public void init() {
-        add(new Navbar());
+        add(navbar());
         Grid<UserEntity> grid = addGrid();
         addButtonBar(grid);
         addForm(grid);

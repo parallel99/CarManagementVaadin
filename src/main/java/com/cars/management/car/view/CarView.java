@@ -2,7 +2,6 @@ package com.cars.management.car.view;
 
 import com.cars.management.car.entity.CarEntity;
 import com.cars.management.car.service.CarService;
-import com.cars.management.components.Navbar;
 import com.cars.management.core.view.CoreView;
 import com.cars.management.manufacturer.entity.ManufacturerEntity;
 import com.cars.management.manufacturer.service.ManufacturerService;
@@ -51,7 +50,7 @@ public class CarView extends CoreView {
 
     @PostConstruct
     public void init() {
-        add(new Navbar());
+        add(navbar());
         Grid<CarEntity> grid = addGrid();
         mainFormPlace = new VerticalLayout();
         form = new FormLayout();

@@ -1,6 +1,5 @@
 package com.cars.management.manufacturer.view;
 
-import com.cars.management.components.Navbar;
 import com.cars.management.core.view.CoreView;
 import com.cars.management.manufacturer.entity.ManufacturerEntity;
 import com.cars.management.manufacturer.service.ManufacturerService;
@@ -38,7 +37,7 @@ public class ManufacturerView extends CoreView {
 
     @PostConstruct
     public void init() {
-        add(new Navbar());
+        add(navbar());
         Grid<ManufacturerEntity> grid = addGrid();
         mainFormPlace = new VerticalLayout();
         form = new FormLayout();

@@ -1,16 +1,24 @@
 package com.cars.management;
 
-import com.cars.management.components.Navbar;
-import com.vaadin.flow.component.Text;
+import com.cars.management.core.view.CoreView;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 @Route
-public class MainView extends VerticalLayout {
+@StyleSheet("styles/styles.css")
+public class MainView extends CoreView {
 
     public MainView() {
-        add(new Navbar());
-        Text text = new Text("Fő oldal");
-        add(text);
+        VerticalLayout nav = navbar();
+        nav.addClassName("menubar");
+
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.add(nav);
+        verticalLayout.setHorizontalComponentAlignment(Alignment.CENTER, nav);
+
+        add(verticalLayout);
+        addClassName("main");
+        setSizeFull();
     }
 }
