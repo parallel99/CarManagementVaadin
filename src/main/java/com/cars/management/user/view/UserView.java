@@ -7,6 +7,7 @@ import com.cars.management.user.service.RoleService;
 import com.cars.management.user.service.UserService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -32,7 +33,7 @@ public class UserView extends CoreView {
     private UserEntity selectedUser;
     private Binder<UserEntity> binder;
     private TextField username;
-    private PasswordField password;
+    private String password;
     private TextField lastName;
     private TextField firstName;
     private ComboBox<RoleEntity> comboBox;
@@ -84,13 +85,6 @@ public class UserView extends CoreView {
         lastName.setMinLength(4);
         form.add(lastName);
 
-        password = new PasswordField();
-        password.setLabel("Password");
-        password.setPlaceholder("Please enter the password");
-        password.setMaxLength(80);
-        password.setMinLength(6);
-        form.add(password);
-
         comboBox = new ComboBox<>();
         comboBox.setItems(roleService.getAll());
         comboBox.setItemLabelGenerator(authorEntity -> authorEntity.getAuthority());
@@ -125,10 +119,13 @@ public class UserView extends CoreView {
                     userEntity.setLastName(lastName.getValue());
                     userEntity.setFirstName(firstName.getValue());
                     userEntity.setAuthorities(Collections.singletonList(comboBox.getValue()));
-                    userEntity.setPassword(new BCryptPasswordEncoder().encode(password.getValue()));
+                    password = service.generatePassayPassword();
+                    userEntity.setPassword(new BCryptPasswordEncoder().encode(password));
                     service.add(userEntity);
                     grid.setItems(service.getAll());
+                    passwordDialog();
                     clearInputs();
+                    form.setVisible(false);
                     Notification.show("Successful save");
                 } else if (binder.isValid()) {
                     selectedUser.setUsername(username.getValue());
@@ -152,8 +149,12 @@ public class UserView extends CoreView {
 
         Button addBtn = new Button("Add user", VaadinIcon.PLUS.create());
         addBtn.addClickListener(buttonClickEvent -> {
-            form.setVisible(true);
-            password.setVisible(true);
+            form.setVisible(!form.isVisible());
+            if (form.isVisible()) {
+                addBtn.setText("Close add user");
+            } else {
+                addBtn.setText("Add user");
+            }
         });
         horizontalLayout.add(addBtn);
         horizontalLayout.setWidth(null);
@@ -199,7 +200,6 @@ public class UserView extends CoreView {
             selectedUser = event.getValue();
             loadData(grid);
             form.setVisible(!grid.asSingleSelect().isEmpty());
-            password.setVisible(false);
         });
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
         grid.setMultiSort(true);
@@ -217,39 +217,48 @@ public class UserView extends CoreView {
 
         binder.forField(firstName)
                 .asRequired("The first name field is required")
-                .withValidator(name -> name.length() >= 4, "The first name is too short")
+                .withValidator(name -> name.length() >= 3, "The first name is too short")
                 .withValidator(name -> name.length() <= 40, "The first name is too long")
                 .bind(UserEntity::getFirstName, UserEntity::setFirstName);
 
         binder.forField(lastName)
                 .asRequired("The last name field is required")
-                .withValidator(name -> name.length() >= 4, "The last name is too short")
+                .withValidator(name -> name.length() >= 3, "The last name is too short")
                 .withValidator(name -> name.length() <= 40, "The last name is too long")
                 .bind(UserEntity::getLastName, UserEntity::setLastName);
-
-        binder.forField(password)
-                .asRequired("The password field is required")
-                .withValidator(name -> name.length() >= 6, "The password is too short")
-                .withValidator(name -> name.length() <= 150, "The password is too long")
-                .bind(UserEntity::getPassword, UserEntity::setPassword);
 
         binder.forField(comboBox).asRequired("Please choose a authority");
     }
 
     private void loadData(Grid<UserEntity> grid) {
         if (!grid.asSingleSelect().isEmpty()) {
-            password.setValue(grid.asSingleSelect().getValue().getPassword());
+            password = grid.asSingleSelect().getValue().getPassword();
             username.setValue(grid.asSingleSelect().getValue().getUsername());
             firstName.setValue(grid.asSingleSelect().getValue().getFirstName());
             lastName.setValue(grid.asSingleSelect().getValue().getLastName());
         }
     }
 
+    private void passwordDialog() {
+        Dialog dialog = new Dialog();
+        dialog.add(readOnlyField(username.getValue() + " password", password));
+        dialog.open();
+        password = "";
+    }
+
+    public static TextField readOnlyField(String label, String text) {
+        TextField field = new TextField();
+        field.setLabel(label);
+        field.setValue(text);
+        field.setReadOnly(true);
+        field.setWidthFull();
+        return field;
+    }
+
     private void clearInputs() {
         username.setValue("");
         lastName.setValue("");
         firstName.setValue("");
-        password.setValue("");
         comboBox.setValue(null);
     }
 }
