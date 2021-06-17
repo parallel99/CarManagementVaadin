@@ -13,9 +13,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
@@ -24,18 +22,21 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.annotation.PostConstruct;
 import java.util.Collections;
-import java.util.List;
 
 @Route
 public class UserView extends CoreView {
 
     private FormLayout form;
+    private FormLayout formSearch;
     private UserEntity selectedUser;
     private Binder<UserEntity> binder;
     private TextField username;
+    private TextField usernameSearch;
     private String password;
     private TextField lastName;
+    private TextField lastNameSearch;
     private TextField firstName;
+    private TextField firstNameSearch;
     private ComboBox<RoleEntity> comboBox;
 
     @Autowired
@@ -50,6 +51,7 @@ public class UserView extends CoreView {
         Grid<UserEntity> grid = addGrid();
         addButtonBar(grid);
         addForm(grid);
+        addSearchForm(grid);
         selectedUser = new UserEntity();
 
         //Add grid to bottom
@@ -108,6 +110,42 @@ public class UserView extends CoreView {
         binder.bindInstanceFields(this);
     }
 
+    private void addSearchForm(Grid<UserEntity> grid) {
+        formSearch = new FormLayout();
+
+        usernameSearch = new TextField();
+        usernameSearch.setLabel("Username");
+        usernameSearch.setPlaceholder("Please enter the username");
+        usernameSearch.setMaxLength(60);
+        formSearch.add(usernameSearch);
+
+        firstNameSearch = new TextField();
+        firstNameSearch.setLabel("First name");
+        firstNameSearch.setPlaceholder("Please enter the First Name");
+        firstNameSearch.setMaxLength(60);
+        formSearch.add(firstNameSearch);
+
+        lastNameSearch = new TextField();
+        lastNameSearch.setLabel("Last name");
+        lastNameSearch.setPlaceholder("Please enter the Last Name");
+        lastNameSearch.setMaxLength(60);
+        formSearch.add(lastNameSearch);
+        formSearch.setColspan(lastNameSearch, 2);
+
+        Button saveBtn = addSearchBtn(grid);
+
+        formSearch.add(saveBtn);
+        formSearch.setColspan(saveBtn, 2);
+        formSearch.setWidth("1200px");
+
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.add(formSearch);
+        verticalLayout.setHorizontalComponentAlignment(Alignment.CENTER, formSearch);
+
+        add(verticalLayout);
+        formSearch.setVisible(false);
+    }
+
     private Button addSaveBtn(Grid<UserEntity> grid) {
         Button saveBtn = new Button("Save");
         saveBtn.addClickListener(buttonClickEvent -> {
@@ -144,9 +182,21 @@ public class UserView extends CoreView {
         return saveBtn;
     }
 
-    private void addButtonBar(Grid<UserEntity> grid) {
-        HorizontalLayout horizontalLayout = new HorizontalLayout();
+    private Button addSearchBtn(Grid<UserEntity> grid) {
+        Button saveBtn = new Button("Search", VaadinIcon.SEARCH.create());
+        saveBtn.addClickListener(buttonClickEvent -> {
+            try{
+                grid.setItems(service.filteredSearch(usernameSearch.getValue(), firstNameSearch.getValue(), lastNameSearch.getValue()));
+                Notification.show("Successful Search");
+            } catch (Exception e) {
+                System.out.println(e);
+                Notification.show("Something went wrong");
+            }
+        });
+        return saveBtn;
+    }
 
+    private void addButtonBar(Grid<UserEntity> grid) {
         Button addBtn = new Button("Add user", VaadinIcon.PLUS.create());
         addBtn.addClickListener(buttonClickEvent -> {
             form.setVisible(!form.isVisible());
@@ -155,13 +205,25 @@ public class UserView extends CoreView {
             } else {
                 addBtn.setText("Add user");
             }
+            formSearch.setVisible(false);
         });
-        horizontalLayout.add(addBtn);
-        horizontalLayout.setWidth(null);
+
+
+        Button searchBtn = new Button("Search user", VaadinIcon.SEARCH.create());
+        searchBtn.addClickListener(buttonClickEvent -> {
+            formSearch.setVisible(!formSearch.isVisible());
+            if (formSearch.isVisible()) {
+                searchBtn.setText("Close search user");
+            } else {
+                searchBtn.setText("Search user");
+            }
+            form.setVisible(false);
+        });
 
         VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.add(horizontalLayout);
-        verticalLayout.setHorizontalComponentAlignment(Alignment.CENTER, horizontalLayout);
+        verticalLayout.add(addBtn, searchBtn);
+        verticalLayout.setHorizontalComponentAlignment(Alignment.CENTER, addBtn);
+        verticalLayout.setHorizontalComponentAlignment(Alignment.CENTER, searchBtn);
 
         add(verticalLayout);
     }
@@ -199,6 +261,7 @@ public class UserView extends CoreView {
         grid.asSingleSelect().addValueChangeListener(event -> {
             selectedUser = event.getValue();
             loadData(grid);
+            formSearch.setVisible(false);
             form.setVisible(!grid.asSingleSelect().isEmpty());
         });
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);

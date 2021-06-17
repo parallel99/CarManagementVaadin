@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.TypedQuery;
 
+import java.util.List;
+
 import static org.passay.DictionarySubstringRule.ERROR_CODE;
 
 @Service
@@ -67,5 +69,14 @@ public class UserServiceImpl extends CoreCRUDServiceImpl<UserEntity> implements 
         String password = gen.generatePassword(10, splCharRule, lowerCaseRule,
                 upperCaseRule, digitRule);
         return password;
+    }
+
+    @Override
+    public List<UserEntity> filteredSearch(String username, String firstName, String lastName) {
+        return entityManager.createQuery("SELECT n FROM UserEntity n WHERE n.username LIKE :username AND n.firstName LIKE :first_name AND n.lastName LIKE :last_name", UserEntity.class)
+                .setParameter("username", "%"+username+"%")
+                .setParameter("first_name", "%"+firstName+"%")
+                .setParameter("last_name", "%"+lastName+"%")
+                .getResultList();
     }
 }
